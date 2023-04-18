@@ -9,6 +9,19 @@ struct Person {
     age: usize,
 }
 
+impl Person {
+    fn new( s: &str) -> Result<Person, Box<dyn std::error::Error>> {
+        let mut parts = s.split(",");
+        let name = parts.next().ok_or("error")?.to_string();
+        let age = parts.next().ok_or("error")?.parse::<usize>()?;
+
+        match parts.next() {
+            None => if name == "" { Err("error".into()) } else { Ok(Person { name: name, age: age }) },
+            _ => Err("error".into())
+        }
+    }
+}
+
 // We implement the Default trait to use it as a fallback
 // when the provided string is not convertible into a Person object
 impl Default for Person {
@@ -35,10 +48,13 @@ impl Default for Person {
 // If while parsing the age, something goes wrong, then return the default of Person
 // Otherwise, then return an instantiated Person object with the results
 
-// I AM NOT DONE
 
 impl From<&str> for Person {
     fn from(s: &str) -> Person {
+        match Person::new(s) {
+            Ok(value) => value,
+            Err(error) => Person::default()
+        }
     }
 }
 
